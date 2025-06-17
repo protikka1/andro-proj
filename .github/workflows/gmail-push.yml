@@ -1,4 +1,4 @@
-name: Push Notification Email
+name: Gmail Push Notification
 
 on:
   push:
@@ -6,14 +6,21 @@ on:
       - main
 
 jobs:
-  email_notify:
+  notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Send email via Mailgun
-        run: |
-          curl -s --user 'api:${{ secrets.MAILGUN_API_KEY }}' \
-          https://api.mailgun.net/v3/${{ secrets.MAILGUN_DOMAIN }}/messages \
-          -F from='GitHub Bot <bot@${{ secrets.MAILGUN_DOMAIN }}>' \
-          -F to=${{ secrets.NOTIFY_EMAIL }} \
-          -F subject='🚀 GitHub Push Notification' \
-          -F text="A push was made to your repository on branch ${{ github.ref }} by ${{ github.actor }}."
+      - name: Send Email via Gmail SMTP
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USER }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "🚨 New Git Push to ${{ github.repository }}"
+          body: |
+            Repo: ${{ github.repository }}
+            Pusher: ${{ github.actor }}
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+          to: ${{ secrets.GMAIL_TO }}
+          from: ${{ secrets.GMAIL_USER }}
