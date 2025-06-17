@@ -1,0 +1,19 @@
+name: Push Notification Email
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  email_notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email via Mailgun
+        run: |
+          curl -s --user 'api:${{ secrets.MAILGUN_API_KEY }}' \
+          https://api.mailgun.net/v3/${{ secrets.MAILGUN_DOMAIN }}/messages \
+          -F from='GitHub Bot <bot@${{ secrets.MAILGUN_DOMAIN }}>' \
+          -F to=${{ secrets.NOTIFY_EMAIL }} \
+          -F subject='🚀 GitHub Push Notification' \
+          -F text="A push was made to your repository on branch ${{ github.ref }} by ${{ github.actor }}."
